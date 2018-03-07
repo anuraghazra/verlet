@@ -1,0 +1,146 @@
+/* Starting Red Alert */
+i {
+	pointer-events: none;
+}
+input,button {
+	width: 100%;
+	padding: 7px;
+	outline: none;
+	border: none;
+}
+
+/* butttons */
+button {
+	padding: 5px;
+	margin-top: 5px;
+	cursor: pointer;
+}
+button:hover {
+	background-color: lightskyblue;
+	color:white;
+}
+
+/* selectbox */
+input[type=number],input[type=text], select {
+	transition: 0.2s;
+}
+input[type=number]:focus, input[type=text]:focus, select:focus {
+	box-shadow: 0px -4px 0px 0px  lightskyblue inset;
+	transition: 0.2s;
+}
+select {
+	width: 50%;
+	padding: 4px;
+	outline: none;
+	border: none;
+	cursor: pointer;
+}
+
+/* textinput */
+input::-webkit-input-placeholder {
+	position: relative;
+	left: 35%;
+	color:slategrey;
+	transition: 0.2s;
+}
+input:focus::-webkit-input-placeholder {
+	left: 0%;
+	color:grey;
+	transition: 0.2s;
+}
+
+
+/* fileupload */
+input::-webkit-file-upload-button {
+	width : 100%;
+	padding: 3px;
+	border: none;
+	color:gray;
+	background-color: white;
+	cursor: pointer;
+}
+input::-webkit-file-upload-button:hover {
+	background-color: lightskyblue;
+	color:white;
+}
+
+
+/* rangeslider */
+input[type=range] {
+	-webkit-appearance: none;
+	padding: 0;
+	border-radius: 15px;
+}
+input[type=range]::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	border-radius:100%;
+	width: 13px;
+	height: 13px;
+	background-color: rgb(98, 193, 252);
+	margin-left: 0;
+	margin-right: 0;
+	margin-top: -4px;
+	cursor: pointer;
+}
+input[type=range]::-webkit-slider-runnable-track {
+	-webkit-appearance: none;
+	height: 5px;
+}
+input[type=range]::-moz-range-track {
+	transform: translate(-10px,0);
+	border-radius: 15px;
+	width : 100%;
+	height: 5px;
+	background-color : white;
+}
+input[type=range]::-moz-range-thumb {
+	transform: translate(-10px,0);
+	border-radius:100%;
+	width: 15px;
+	height: 15px;
+	background-color: rgb(98, 193, 252);
+	margin-left: 0;
+	margin-right: 0;
+	margin-top: -5px;
+	cursor: pointer;
+	border: none;
+	outline:none;
+}
+
+/* input color */
+input[type=color] {
+	position: relative; /*for placeHolder*/
+	border: none;
+	outline: none;
+	width: 100%;
+	padding: 0;
+	margin: 0;
+	cursor: pointer;
+}
+input[type=color]::-webkit-color-swatch-wrapper {
+	border: none;
+	outline: none;
+	padding: 2px;
+	margin: 0;
+}
+input[type=color]::-webkit-color-swatch {
+	border: none;
+	outline: none;
+	padding: 0;
+	margin: 0;
+}
+input[type=color]:hover {
+	outline: 1px solid white;
+}
+input[type=color]:after {
+	position: absolute;
+	top:2px;
+	left: calc(50% - 40px);
+	content: 'Pick A Color';
+	color:white;
+}
+
+hr {
+	color:white;
+	border: 0.7px solid white;
+}
