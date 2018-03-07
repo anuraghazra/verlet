@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="js/verlet.js" async></script>
+</head>
+<body>
+    <canvas id="c" style="border:1px solid black"></canvas>
+    <pre id="test"></pre>
+<script>
+window.onload = function() {
+    const verlet = new Verlet();
+    verlet.init(500,500,'#c',1,1);
+    const ctx = verlet.ctx;
+
+    let points = [],
+        constrains = [],
+        forms = [];
+
+    verlet.Poly.rope({
+        width: 100,height : 100,
+        x : 100, y : 100,
+        vx : 100, vy : 100
+    },points,constrains);
+    verlet.Poly.triangle({
+        width: 150,height : 50,
+        x : 100, y : 100
+    },points,constrains);
+    verlet.Poly.triangle({
+        width: 100,height : 50,
+        x : 200, y : 200
+    },points,constrains);
+    verlet.Poly.hexagon({
+        radius : 50,
+        sides : 8,
+        slice1 : 2,slice2 : 5,
+        x : 200, y : 200
+    },points,constrains);
+
+    
+    verlet.shape([0,1,2],forms,points,'tomato');
+    verlet.shape([3,4,5],forms,points,'yellowgreen');
+    verlet.shape([6,7,8,9,10,11,12,13],forms,points,'deepskyblue');
+
+    console.log(forms);
+    animate();
+    verlet.Interact.move(points)
+    function animate() {
+        verlet.clear();
+
+        verlet.renderShapes(forms);
+        // verlet.renderPointIndex(points);
+        // verlet.superRender(points,constrains);
+        verlet.superUpdate(points,constrains,20);
+        
+        requestAnimationFrame(animate);
+    }
+}        
+</script>
+</body>
+</html>

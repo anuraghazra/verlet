@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Canvas Boilerplate</title>
+    <script src="js/verlet.js" async></script>
+</head>
+<body>
+    <canvas id="c" style="border: 1px solid black"></canvas>
+<script>
+window.onload = function() {
+    const verlet = new Verlet();
+    verlet.init(500,350,'#c',0,0);
+
+    let points = [];
+    let constrains = [];
+
+    function jelly(x,y,w,h) {
+        let tmpDots = [];
+        let tmpCons = [];
+        let oldy = y;
+        let oldx = x;
+        let calcH;
+        let skip = w;
+        // X
+        for (let i = 0, space = 0; i < w; i++,space+=1) {
+            x += 20;
+            tmpDots.push([x,y,x,y]);
+            // Y
+            if(skip !== w-2) {
+                for (let j = 0; j < h; j++) {
+                    y += 20;
+                    if(skip > 0) {
+                        if(i !== skip) {
+                            tmpDots.push([x,y,x,y]);
+                        }
+                    }
+                    skip--;
+                }
+            }
+            y = oldy;
+        }
+        verlet.create(tmpDots,points);
+    }
+    jelly(100,100,10,10);
+
+    animate();
+    verlet.Interact.move(points);
+    function animate() {
+        verlet.clear();
+
+        verlet.superRender(points,constrains,{
+            preset: 'shadowRed',
+            renderPointIndex : true,
+            fontColor : 'black'
+        });
+        verlet.superUpdate(points,constrains,10,{hoverColor : 'black'});
+
+        requestAnimationFrame(animate);
+    }
+}
+</script>
+</body>
+</html>

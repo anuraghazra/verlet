@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Canvas Boilerplate</title>
+    <script src="js/verlet.js" async></script>
+    <script src="VerletDrawing/js/drag.js" async></script>
+    <style>
+        * {
+            color : #ff2e2e
+        }
+    </style>
+</head>
+<body>
+    <canvas id="c" style="border: 1px solid black"></canvas>
+<script>
+window.onload = function() {
+    const verlet = new Verlet();
+    verlet.init(500,400,'#c',0,0);
+    const ctx = verlet.ctx;
+
+    let points = [],
+        constrains = [];
+
+    
+    function createBox(posx,posy,w,h,p,c) {
+        verlet.Poly.box({
+            x : posx ,y : posy,
+            width : w, height : h
+        },p,c);
+    }
+    function rope(posx,posy,w,h,p,c) {
+        verlet.Poly.rope({
+            x : (posx+w) ,y : (posy+h),
+            parts : w/12,
+            gap : h
+        },p,c);
+    }
+    function cloth(posx,posy,w,h,p,c) {
+        verlet.Poly.cloth({
+            x : (posx+w) ,y : (posy+h),
+            segs : w/12,
+            gap : h
+        },p,c);
+    }
+    function hexa(posx,posy,w,h,p,c) {
+        verlet.Poly.hexagon({
+            x : (posx+w) ,y : (posy+h),
+            radius : (h/2),
+            sides : 16,
+            slice1 : 1,
+            slice2 : 8,
+            center : true
+        },p,c);
+    }
+    function createTri(posx,posy,w,h,p,c) {
+        verlet.Poly.triangle({
+            x : posx ,y : posy,
+            width : w, height : h
+        },p,c);
+    }
+
+    let box = new drag(verlet,points,constrains);
+        box.initDrag(createBox);
+    // let tri = new drag(verlet,points,constrains);
+    //     tri.initDrag(cloth);
+
+    verlet.Interact.move(points);
+    animate();
+    function animate() {
+        verlet.clear();
+
+        verlet.superRender(points,constrains,{
+            renderPointIndex : true,
+        });
+        verlet.superUpdate(points,constrains,10,{hoverColor:'red'});
+
+        
+		box.drawTmpBox(true);
+        // tri.drawTmpBox();
+        
+        requestAnimationFrame(animate);
+    }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+</head>
+<body>
+<canvas id="c" width="1000" height="500" style="border:1px solid black"></canvas>
+<script src="js/verlet.js"></script>
+<br>
+<div>
+	<p>Physics Accuracy</p>
+	<input type="number" id="Iterrations" placeholder="Physics Accuracy" value="100" min="1">
+	<p>Render Options</p>
+	<input type="checkbox" id="dots" checked="true"><lable>Points</lable>
+	<input type="checkbox" id="lines" checked="true"><lable>Lines</lable>
+	<input type="checkbox" id="pointIndex" checked="true"><lable>Point Index</lable>
+</div>
+<script>
+window.onload = function() {
+	const verlet = new Verlet();
+	verlet.init(1000,500,'#c',0.8,0.99);
+
+	var PhysicsAccuracy = document.getElementById('Iterrations'),
+		dotOpt = document.getElementById('dots'),
+		LineOpt = document.getElementById('lines'),
+		IndexOpt = document.getElementById('pointIndex');	
+
+
+	var points = [],	
+		points2 = [],	
+		constrains = [],
+		constrains2 = [];
+
+	var circle = {
+		x : 500,y : 200,
+		radius : 100
+	}	
+
+	var i_c = {
+		x: 0, y : 0,
+		radius : 60
+	}
+	var i_c2 = {
+		x: 0, y : 0,
+		radius : 100
+	}
+
+	function createCircle(parray,carray,x,y,sides,radius) {
+		var angle = 0;
+		var slice = Math.PI*2 / sides;
+		parray.push({
+			x : x + Math.cos(angle),
+			y : y + Math.sin(angle),
+			oldx : x + Math.cos(angle),
+			oldy : y + Math.sin(angle)
+		})
+		for(var i = 0; i < sides; i++) {
+			angle = i * slice;
+			parray.push({
+				x : x + Math.cos(angle) * radius,
+				y : y + Math.sin(angle) * radius,
+				oldx : x + Math.cos(angle) * radius,
+				oldy : y + Math.sin(angle) * radius
+			})
+
+			carray.push({
+				p0 : parray[i],
+				p1 : parray[(i + 1) % sides],
+				len : distance(parray[i],parray[(i + 1) % sides])
+			})
+			if(i > 0) {
+				carray.push({
+					p0 : parray[i+1],
+					p1 : parray[0],
+					len : distance(parray[i+1],parray[0])
+				})
+			}
+
+			if(i > sides-2) {
+				carray.push({
+					p0 : parray[sides],
+					p1 : parray[sides-1],
+					len : distance(parray[sides],parray[sides-1])
+				})
+				carray.push({
+					p0 : parray[sides],
+					p1 : parray[sides-sides+1],
+					len : distance(parray[sides],parray[sides-sides+1])
+				})
+				var k = 0;
+				for(var j = 0; j < sides; j++) {
+					k++; 
+					carray.push({
+						p0 : parray[(j+k) % sides],
+						p1 : parray[(i + 1) % k],
+						len : distance(parray[(j+k) % sides],parray[(i + 1) % k]),
+						hidden : true
+					})
+				}
+			}
+		}
+	}
+	function distance(p1,p2) {
+		let dx = p2.x - p1.x;
+		let dy = p2.y - p1.y;
+		return Math.sqrt(dx*dx + dy*dy)
+	}
+	createCircle(points,constrains,100,100,32,60);
+	createCircle(points2,constrains2,200,200,32,100);
+	// createCircle(50,50,8,50);
+	verlet.canvas.onmousemove = function(e) {
+		circle.x = e.offsetX;
+		circle.y = e.offsetY;
+	}
+
+	verlet.Interact(points,constrains,'black')
+	verlet.Interact(points2,constrains2,'black')
+	function animate() {
+		verlet.clear();
+
+		i_c.x = points[0].x;
+		i_c.y = points[0].y;
+		i_c2.x = points2[0].x;
+		i_c2.y = points2[0].y;
+
+		if(dotOpt.checked == true) {
+			verlet.renderDots(points,5,'black');
+			verlet.renderDots(points2,5,'black');
+		}
+		if(LineOpt.checked == true) {
+			verlet.renderLines(constrains);
+			verlet.renderLines(constrains2);
+		}
+		if(IndexOpt.checked == true) {
+			verlet.renderPointIndex(points);
+			verlet.renderPointIndex(points2);
+		}
+		verlet.superUpdate(points,constrains,PhysicsAccuracy.value);
+		verlet.superUpdate(points2,constrains2,PhysicsAccuracy.value);
+		for (var i = 0; i < PhysicsAccuracy.value; i++) {
+			verlet.Collision.pointToCircle(points,i_c2)
+			verlet.Collision.pointToCircle(points2,i_c)
+			verlet.Collision.pointToCircle(points,circle)
+			verlet.Collision.pointToCircle(points2,circle)
+		}	
+		verlet.ctx.beginPath();
+		verlet.ctx.arc(circle.x,circle.y,circle.radius,0,Math.PI*2);
+		verlet.ctx.stroke();
+	
+	
+		requestAnimationFrame(animate)
+	}
+	animate();
+}		
+</script>
+</body>
+</html>

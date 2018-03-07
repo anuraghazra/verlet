@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+<canvas id="c" style="border:1px solid black"></canvas>
+<script>
+window.onload = function() {
+    const canvas = document.querySelector('#c'),
+          ctx = canvas.getContext('2d');
+
+    canvas.width = 500;
+    canvas.height = 500;
+    const width = canvas.width,
+        height = canvas.height;
+
+    const points = [];
+    const constrains = [];
+    points.push({
+        x : 100 / 2,
+        y : 100 / 2,
+        oldx : 100 / 2,
+        oldy : Math.random()*100+10
+    })
+    points.push({
+        x : 200 / 2,
+        y : 100 / 2,
+        oldx : 200 / 2,
+        oldy : 100 / 2
+    })
+    points.push({
+        x : 200 / 2,
+        y : 200 / 2,
+        oldx : 200 / 2,
+        oldy : 200 / 2
+    })
+    points.push({
+        x : 100 / 2,
+        y : 200 / 2,
+        oldx : Math.random()*100+10,
+        oldy : 200 / 2
+    })
+    constrains.push({
+        p0 : points[0],
+        p1 : points[1],
+        len : distance(points[0],points[1])
+    })
+    constrains.push({
+        p0 : points[1],
+        p1 : points[2],
+        len : distance(points[1],points[2])
+    })
+    constrains.push({
+        p0 : points[2],
+        p1 : points[3],
+        len : distance(points[2],points[3])
+    })
+    constrains.push({
+        p0 : points[3],
+        p1 : points[0],
+        len : distance(points[3],points[0])
+    })
+    constrains.push({
+        p0 : points[0],
+        p1 : points[2],
+        len : distance(points[0],points[2])
+    })
+    
+    function distance(p1,p2) {
+        let dx = p2.x - p1.x;
+        let dy = p2.y - p1.y;
+        return Math.sqrt(dx*dx + dy*dy);
+    }
+    function updatePoint() {
+        for (let i = 0; i < points.length; i++) {
+            let p = points[i];
+            let vx = (p.x - p.oldx);
+            let vy = (p.y - p.oldy);
+            
+            p.oldx = p.x;
+            p.oldy = p.y;
+            p.x += vx;
+            p.y += vy;
+            p.y += 1;
+        }
+    }
+    function updateCollision() {
+        for (let i = 0; i < points.length; i++) {
+            let p = points[i];
+            let vx = (p.x - p.oldx);
+            let vy = (p.y - p.oldy);
+            
+            if (p.x > width) {
+                p.x = width;
+                p.oldx = p.x + vx;
+            } else if (p.x < 0) {
+                p.x = 0;
+                p.oldx = p.x + vx;
+            }
+            if (p.y > height) {
+                p.y = height;
+                p.oldy = p.y + vy;
+            } else if (p.y < 0) {
+                p.y = 0;
+                p.oldy = p.y + vy;
+            }
+        }
+    }
+    function constrainPoints() {
+        for (let i = 0; i < constrains.length; i++) {
+            const c = constrains[i];
+            let dx = c.p1.x - c.p0.x;
+            let dy = c.p1.y - c.p0.y;
+            let dist = Math.sqrt(dx*dx + dy*dy);
+            let diff = (dist - c.len) / dist;
+            let offsetX = dx * 0.5 * diff;
+            let offsetY = dy * 0.5 * diff;
+
+            c.p1.x -= offsetX;
+            c.p1.y -= offsetY;
+
+            c.p0.x += offsetX;
+            c.p0.y += offsetY;
+        }
+    }
+    function renderPoints() {
+        for (let i = 0; i < points.length; i++) {
+            const p = points[i];
+            ctx.fillStyle = 'black';
+            ctx.beginPath();
+            ctx.arc(p.x,p.y,5,0,Math.PI*2);
+            ctx.closePath();
+            ctx.fill();
+        }
+    }
+    function renderLines() {
+        ctx.beginPath();
+        ctx.strokeStyle = 'black';
+        for (let i = 0; i < constrains.length; i++) {
+            const c = constrains[i];
+            ctx.moveTo(c.p0.x,c.p0.y);
+            ctx.lineTo(c.p1.x,c.p1.y);
+        }
+        ctx.stroke();
+        ctx.closePath();
+    }
+    function animate() {
+        ctx.clearRect(0,0,width,height);
+        
+        updatePoint();
+        updateCollision();
+        for (let i = 0; i < 100; i++) {
+            constrainPoints();
+        }
+        renderPoints();
+        renderLines();
+        
+        
+        requestAnimationFrame(animate)
+    }
+    animate();
+}
+</script>
+</body>
+</html>

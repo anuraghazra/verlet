@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<script src="js/verlet.js"></script>
+</head>
+<canvas id="c" style="border:1px solid black"></canvas>
+<body>
+<script>
+/* FIXED :: Undefined Stiffness Cause NaN In ox,oy*/
+window.onload = function() {
+	let verlet = new Verlet();
+	verlet.init(1000,500,'#c',0.8,0.99);
+	var points = [];
+	var constrains = [];
+
+	verlet.Poly.box({
+		width: 50, height : 50,
+		x : 50, y : 50
+	},points,constrains)
+
+	verlet.Poly.cloth({
+		x : 100, y : 100,
+		gridX : 50, gridY : 50,
+		gap : 15,
+		segs : 5
+	},points,constrains);
+	let pin = 35
+	while(pin--) {
+		points[pin].pinned = true
+	}
+
+	verlet.Interact(points)
+	function animate() {
+		verlet.clear();
+
+		verlet.superRender(points,constrains)
+		verlet.superUpdate(points,constrains,15);
+		requestAnimationFrame(animate);
+	}
+	animate();
+}
+</script>
+</body>
+</html>

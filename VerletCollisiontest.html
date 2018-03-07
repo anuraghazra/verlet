@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+</head>
+<body>
+<canvas id="c" width="1000" height="500" style="border:1px solid black"></canvas>
+<script src="js/verlet.js"></script>
+<br>
+<div>
+	<p>Physics Accuracy</p>
+	<input type="number" id="Iterrations" placeholder="Physics Accuracy" value="10" min="1">
+	<p>Render Options</p>
+	<input type="checkbox" id="dots" checked="true"><lable>Points</lable>
+	<input type="checkbox" id="lines" checked="true"><lable>Lines</lable>
+	<input type="checkbox" id="pointIndex" checked="true"><lable>Point Index</lable>
+</div>
+<script>
+window.onload = function() {
+	const verlet = new Verlet();
+	verlet.init(1000,500,'#c',0.8,0.99),
+		canvas = verlet.canvas,
+		ctx = verlet.ctx,
+		width = canvas.width,
+		height = canvas.height;
+	var PhysicsAccuracy = document.getElementById('Iterrations'),
+		dotOpt = document.getElementById('dots'),
+		LineOpt = document.getElementById('lines'),
+		IndexOpt = document.getElementById('pointIndex');	
+
+	var points = [];
+	var constrains = [];
+	var gravity = 0.8;
+	
+	//Box
+	var box_one = verlet.Poly.box({
+		x: 100,y:100,width : 100,height:100,
+		vx : 100,vy:100
+	},points,constrains);
+	var box_two = verlet.Poly.box({
+		x: 50,y:50,width : 50,height:50,
+		vx : 50,vy:50
+	},points,constrains);
+
+	var c1 = {
+		x : width / 2,
+		y : height / 2,
+		radius : 20
+	}
+	var c2 = {
+		x : width - 250 / 2,
+		y : height / 2,
+		radius : 20
+	}
+	var c3 = {
+		x : 250 / 2,
+		y : height / 2,
+		radius : 20
+	}
+
+
+	function findTheAngle(b) {
+		var dx = b.points[0].x - b.points[1].x;
+		var dy = b.points[0].y - b.points[1].y;
+		var angle = Math.atan2(dy,dx);
+		return angle;
+	}
+
+	function pointToPoint(p_one,p_two) {
+		for (var i = 0; i < p_one.length; i++) {
+			var p1 = p_one[i];
+			var p2 = p_two[(i+1) % p_two.length];
+			var cdx = p1.x - p2.x; 
+			var cdy = p1.y - p2.y;
+			if(cdx*cdx + cdy*cdy < 20*4) {
+				var depth = Math.sqrt((20*4) / cdx*cdx + cdy*cdy);
+				cdx *= depth;
+				cdy *= depth;
+				p1.x = depth + p2.x;
+				p1.y = depth + p2.y;
+			} 
+		}
+	}
+
+	verlet.Interact.move(points);
+	// canvas.onmousemove = function(e) {
+	// 	c1.x = e.clientX;
+	// 	c1.y = e.clientY;
+	// 	pointToPoint(c2,c1)
+	// }
+	function animate() {
+		ctx.clearRect(0,0,width,height);
+		if(dotOpt.checked == true) {
+			verlet.renderDots(points);
+		}
+		if(LineOpt.checked == true) {
+			verlet.renderLines(constrains);
+		}
+		if(IndexOpt.checked == true) {
+			verlet.renderPointIndex(points);
+		}
+		verlet.superUpdate(points,constrains,PhysicsAccuracy.value,'red')
+		for (var i = 0; i < PhysicsAccuracy.value; i++) {
+			verlet.Collision.pointToCircle(points,c1);
+			verlet.Collision.pointToCircle(points,c2);
+			verlet.Collision.pointToCircle(points,c3);
+		}
+		requestAnimationFrame(animate)
+	}
+	animate();
+}	
+</script>	
+</body>
+</html>

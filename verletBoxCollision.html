@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+</head>
+<body>
+<canvas id="c" width="1000" height="500" style="border:1px solid black"></canvas>
+<script src="js/verlet.js"></script>
+<br>
+<div>
+</div>
+<script>
+window.onload = function() {
+	const verlet = new Verlet();
+	verlet.init(1000,500,'#c',1,1);
+
+	var canvas = document.getElementById('c'),
+		ctx = canvas.getContext('2d'),
+		width = canvas.width,
+		height = canvas.height;
+	var PhysicsAccuracy = document.getElementById('Iterrations'),
+		dotOpt = document.getElementById('dots'),
+		LineOpt = document.getElementById('lines'),
+		IndexOpt = document.getElementById('pointIndex');	
+
+	var points = [];
+	var constrains = [];
+	var gravity = 0.8;
+
+	verlet.Poly.box({
+		x : 100, y : 100,
+		width : 100, height : 100
+	},points,constrains);
+	
+	var rope = verlet.Poly.rope({
+		x : 100,y : 200,
+		parts : 10,
+		gap : 8
+	},points,constrains);
+
+	// verlet.create(rope.points,points);
+	// verlet.clamp(rope.joints,constrains,points);
+
+	function pointToAABB(p,box) {
+		var width = box.points[1].x - box.points[0].x;
+		var height = box.points[3].y - box.points[0].y;
+		var b = box.points;
+		console.log(b[0].x,width,height)
+		for (var i = 0; i < p.length; i++) {
+		return inRange(p[i].x,b[0].x,b[0].x + width) &&
+		       inRange(p[i].y,b[0].y,b[0].y + height);
+		}
+	} 
+	function inRange(value,min,max) {
+		return value >= min && value <= max
+	}
+
+	verlet.Interact.move(points)
+	function animate() {
+		verlet.clear();
+
+		verlet.superRender(points,constrains,{preset : 'shadowRed'});
+		verlet.superUpdate(points,constrains,10,{hoverColor : 'red'})		
+		
+		// for (var i = 0; i < points.length; i++) {
+		// 	if(pointToAABB(points,box_one)) {
+		// 		points[i].y = box_one.points[0].y;  
+		// 	}
+		// }	
+		requestAnimationFrame(animate)
+	}
+	animate();
+}	
+</script>	
+</body>
+</html>

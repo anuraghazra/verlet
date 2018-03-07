@@ -1,0 +1,106 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Untitled Document</title>
+<script src="js/verlet.js"></script>
+</head>
+
+<body>
+<canvas id="c" width="800" height="600" style="border:1px solid black"></canvas>
+<script>
+window.onload = function() {
+	var canvas = document.getElementById('c'),
+		ctx = canvas.getContext('2d'),
+		width = canvas.width,
+		height = canvas.height;
+
+var points;
+// Creates a new rope to manipulate.  This function is also called to reset after entering a bad state.
+function createRope() {
+	points = (function( x0, y0, x1, y1, steps ) {
+		var dx = (x1-x0)/steps;
+		var dy = (y1-y0)/steps;
+		var d = Math.sqrt( dx*dx + dy*dy ); // || 10
+		var x = x0;
+		var y = y0;
+		var pts = [];
+		// The random variation in the value for "last y" gives the illusion of the rope snapping in to existence.
+		for( var i = 0 ; i < steps ; ++i, x+=dx, y+=dy) {
+			pts.push({ x:x, y:y, lx:x, ly:y+10*Math.random(), distFromParent:d });
+			
+		}
+		return pts;
+		
+		
+	})( 50, 50, 750, 50, 20 );
+}
+createRope();
+	function updatePoints() {
+		for( var i = 0 ; i < points.length ; ++i ) {
+			var newX = points[i].x + (points[i].x - points[i].lx);
+			var newY = points[i].y + (points[i].y - points[i].ly) + 0.4;
+			points[i].lx = points[i].x;
+			points[i].ly = points[i].y;
+			points[i].x = newX;
+			points[i].y = newY;		 
+		}
+	}
+
+	function updateSticks() {
+		var iterations = 100;
+		while( iterations-- ) {
+			for (var i = 0; i < points.length; ++i) {
+				if( i >= 1 ) {
+					var s = points[i],
+						sMinus = points[i-1],
+						dx = s.x - sMinus.x,
+						dy = s.y - sMinus.x,
+						distance = Math.sqrt(dx * dx + dy * dy),
+						distCX = dx / distance,
+						distCY = dy / distance,
+						diff = (distance - s.distFromParent) / 2,
+						offsetX = diff * distCX,
+						offsetY = diff * distCY;
+
+						sMinus.x += offsetX;	
+						sMinus.y += offsetY;
+
+						s.x -= offsetX;	
+						s.y -= offsetY;
+				}	
+				if( points[i].x < 0 ) points[i].x = 0;
+				if( points[i].y < 0 ) points[i].y = 0;
+				if( points[i].x > 800 ) points[i].x = 800;
+				if( points[i].y > 600 ) points[i].y = 600;
+			}
+		}	
+	}
+	function renderStricks() {
+		ctx.beginPath();
+		ctx.moveTo(points[0].x,points[0].y);
+		for (var i = 1; i < points.length; ++i) {
+			var s = points[i];
+				ctx.lineTo(s.x,s.y);
+		}
+		ctx.stroke();
+	}
+
+function failureCheck()
+{
+	if( isNaN( points[0].x ) ) createRope();
+}
+	function animate() {
+		ctx.clearRect(0,0,width,height);
+		failureCheck()
+		updateSticks();
+		updatePoints();
+		renderStricks();
+		window.requestAnimationFrame(animate)	
+	}
+	animate();
+
+}
+</script>
+</body>
+</html>

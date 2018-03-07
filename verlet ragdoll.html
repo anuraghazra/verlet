@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="js/verlet.js" async></script>
+</head>
+<body>
+    <canvas id="c" style="border:1px solid black"></canvas>
+<script>
+window.onload = function() {
+    const verlet = new Verlet();
+    verlet.init(500,350,'#c',1,1);
+
+    let points = [],
+        constrains = [];
+
+    let dollPoints = [];
+    let dollCons = [];
+    
+    dollPoints = [
+        [200,70], //head
+        [200,100], //neck
+        [220,100], //shoulder1
+        [180,100], //shoulder2
+        [120,160], //left-hand
+        [280,160], //right-hand
+        [200,200], // hipJoint
+        [175,210], //pelvis1
+        [225,210], //pelvis2
+        [175,250], //thigh1
+        [225,250], //thigh2
+        [175,300], //leg1
+        [225,300] //leg2
+    ]
+
+    dollCons = [
+        [0,1],
+        [1,2],
+        [1,3],
+        [3,4],
+        [2,5],
+        [1,6],
+        [6,7],
+        [6,8],
+        [7,9],
+        [9,11],
+        [8,10],
+        [10,12], 
+        //Hiddens
+        [0,3,true], //head - shoulder
+        [0,2,true], ////////////////
+        [3,7,true], //body box
+        [2,8,true], //
+        [3,8,true], //
+        [2,7,true], //the body box
+        [7,8,true],
+        [0,12,true],
+        [0,11,true],
+        [0,9,true],
+        [0,10,true],
+        [7,12,true],
+        [8,11,true],
+        [8,12,true],
+        [7,11,true]
+    ]
+
+    // verlet.create(dollPoints,points);
+    // verlet.clamp(dollCons,constrains,points);
+   
+    verlet.Poly.advanceCloth({
+        x : 100, y : 20,
+        gap : 10,
+        segs : 500,
+        gridX : 20, gridY : 20,
+        pinRatio : 1
+    },points,constrains)
+
+    animate();
+    verlet.Interact.move(points,constrains);
+    function animate() {
+        verlet.clear();
+        
+        verlet.superRender(points,constrains,{debug : false,pointRadius : 2});
+        verlet.superUpdate(points,constrains,5,{hoverColor : 'black'});
+        
+        requestAnimationFrame(animate);
+    }
+}        
+</script>
+</body>
+</html>

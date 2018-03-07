@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<script src="js/verlet.js"></script>
+</head>
+<body>
+<canvas id="c" style="border:1px solid black"></canvas>
+<div id="container"></div>
+<script>
+window.onload = function() {
+	const verlet = new Verlet();
+	verlet.init(650,350,'#c',1,1);
+	
+	const points = [];
+	const constrains = [];
+	const forms = [];
+
+	
+	verlet.Poly.bind(points,constrains);
+	verlet.Poly.cloth({
+		x : 320,y : 20,
+		gap : 12,
+		segs : 17,
+		pinRatio : 3
+	});
+
+	verlet.Poly.hexagon({
+		x : 100, y : 100,
+		radius : 50,
+		sides : 64,
+		slice1 : 1,
+		slice2 : 25
+	});
+
+	verlet.Poly.cloth({
+		x : 50,y : 20,
+		gap : 12,
+		segs : 15,
+		pinRatio : 3
+	});
+	// verlet.shape([0,1,2,3],forms,points,'deepskyblue');
+	// verlet.shape([0,1,2,3,4,5,6,7],forms,points,'crimson');
+
+	verlet.Studio.init('#container');
+	verlet.Interact.move(points);
+	animate();
+	function animate() {
+		verlet.clear();
+		
+		verlet.Studio.update({
+			points : points,
+			cons : constrains,
+			forms : forms,
+			option : {
+				pointRadius : 2,
+				pointColor : 'blue',
+				lineColor : 'green',
+				lineWidth : 0.5
+			}
+		});
+		
+		// verlet.Poly.tearCloth(constrains);
+
+		requestAnimationFrame(animate);
+	}
+}
+</script>
+</body>
+</html>

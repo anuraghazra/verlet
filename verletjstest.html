@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<!--[if IE]><script src="js/excanvas.js"></script><![end if]-->
+</head>
+<body>
+<canvas id="c" width="1000" height="500" style="border:1px solid black"></canvas>
+<script src="js/verlet.js"></script>
+<br>
+<div>
+	<p>Physics Accuracy</p>
+	<input type="number" id="Iterrations" placeholder="Physics Accuracy" value="10" min="1">
+	<p>Render Options</p>
+	<input type="checkbox" id="dots" checked="true"><lable>Points</lable>
+	<input type="checkbox" id="lines" checked="true"><lable>Lines</lable>
+	<input type="checkbox" id="pointIndex"><lable>Point Index</lable>
+</div>
+<script>
+window.onload = function() {
+	const verlet = new Verlet();
+	verlet.init(1000,500,'#c',0.8,0.99);
+
+	var PhysicsAccuracy = document.getElementById('Iterrations'),
+		dotOpt = document.getElementById('dots'),
+		LineOpt = document.getElementById('lines'),
+		IndexOpt = document.getElementById('pointIndex');	
+
+	var points = [];
+	var constrains = [];
+	var gravity = 0.8;
+
+	//Box
+	
+	verlet.Poly.box({
+		x : 100, y : 100, 
+		vx : 100, vy : 100,
+		width : 100,
+		height : 100
+	},points,constrains);
+	// createBox(100,100,100,100);
+	// var rope = verlet.Poly.rope(100,100,20,10);
+	// verlet.create(rope.points,points);
+	// verlet.clamp(rope.joints,constrains,points);
+	// console.log(points)
+
+	
+	verlet.Interact(points,constrains);
+	function animate() {
+		verlet.clear();
+		if(dotOpt.checked == true) {
+			verlet.renderDots(points,5);
+		}
+		if(LineOpt.checked == true) {
+			verlet.renderLines(constrains);
+		}
+		if(IndexOpt.checked == true) {
+			verlet.renderPointIndex(points);
+		}
+		verlet.superUpdate(points,constrains,30);
+		requestAnimationFrame(animate)
+	}
+	animate();
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="js/verlet.js" async></script>
+</head>
+<body>
+<div id="container">
+	<canvas id="c" style="border:1px solid black"></canvas>
+</div>
+    
+<script>
+window.onload = function() {
+    const verlet = new Verlet();
+    verlet.init(500,500,'#c',1,1,);
+    let ctx = verlet.ctx;
+    
+    let cir = {
+        x : 0,
+        y : 0,
+        radius: 25
+    }
+
+    const points = [],
+        constrains = [];
+
+    function cloth(opt,dots,cons) {
+        let x = opt.x,
+            y = opt.y,
+            gap = opt.gap,
+            segs = opt.segs;
+
+        let oldx = x;
+        let tmpDots = [];
+        let tmpCons = [];
+        for (let i = 0; i < segs; i++) {
+            for (let j = 0; j < segs; j++) {
+                tmpDots.push([
+                    x,y,x,y
+                ])
+                x += gap;
+            }
+            x = oldx;
+            y += gap;
+            
+        }
+        for (let j = 0; j < tmpDots.length-1; j++) {
+            if( (j+1)%segs > 0 ) {
+                tmpCons.push([
+                    j,j+1
+                ])
+            }
+        }
+        for (let j = 0; j < tmpDots.length-segs; j++) {
+            tmpCons.push([
+                j,j+segs
+            ])
+        }
+        let pinRatio = opt.pinRatio || 1;
+        for (let l = 0; l < pinRatio; l++) {
+            tmpDots[l][4] = true;
+        }
+        verlet.create(tmpDots,dots);
+        verlet.clamp(tmpCons,cons,dots);
+    }
+
+    verlet.Poly.cloth({
+        x : 50, y :10,
+        gap : 5,
+        segs : 50,
+        pinRatio: 1
+    },points,constrains);
+    
+
+    verlet.canvas.onmousemove = function(e) {
+        cir.x = e.offsetX;
+        cir.y = e.offsetY;
+    }
+    let isDown = false;
+    // verlet.canvas.onmousedown = () => {
+    //     isDown = true;
+    // }
+    // verlet.canvas.onmouseup = () => {
+    //     isDown = false;
+    // }
+    verlet.Studio.init('#container');
+    verlet.Interact.move(points);
+    animate();
+    function animate() {
+        verlet.clear();
+        
+        verlet.Studio.update({
+        	points : points,
+        	cons : constrains,
+        	option : {
+            	hoverColor : 'red',
+            	lineWidth : 0.3
+        	}
+        });
+
+        // ctx.beginPath();
+        // ctx.strokeStyle = 'black';
+        // ctx.arc(cir.x,cir.y,cir.radius,0,Math.PI*2);
+        // ctx.stroke();
+        // ctx.closePath();
+        
+        for (let i = 0; i < constrains.length; i++) {
+            let p;
+            if( ( constrains[i].p1.y -  constrains[i].p0.y) > 40 ||
+             ( constrains[i].p1.x -  constrains[i].p0.x) > 20) {
+                constrains.splice(i,1);
+            }
+        }
+        if(isDown === true) {
+            verlet.Collision.pointToCircle(points,cir);
+        }
+        requestAnimationFrame(animate)
+    }
+}
+</script>
+</body>
+</html>

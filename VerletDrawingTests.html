@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<script src="js/verlet.js"></script>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+window.onload = function() {
+	const verlet = new Verlet();
+	verlet.init(1000,500,"#c",1,1);
+	var canvas = verlet.canvas;
+	var ctx = verlet.ctx;
+
+	var points = [],
+		constrains = [];
+
+	var p = [
+		[100,100,100,100],
+		[200,200,200,200],
+		[100,200,100,200],
+		[200,100,200,100]
+	]
+	var c = [
+		[0,1,false],
+		[1,2,false],
+		[2,3,false],
+		[2,0,true],
+		[3,1,true]
+	]
+	
+	verlet.create(p,points);
+	verlet.clamp(c,constrains,points);
+
+	animate();
+	verlet.Interact(points)
+	function animate() {
+		verlet.clear();
+		verlet.renderPointIndex(points)
+		verlet.superRender(points,constrains);
+		verlet.superUpdate(points,constrains,10);
+
+		verlet.Draw.arc(100,100,15,'blue',true);
+		requestAnimationFrame(animate);
+	}
+}
+</script>
+</body>
+</html>

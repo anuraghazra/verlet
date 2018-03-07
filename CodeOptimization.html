@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="js/verlet.js" async></script>
+</head>
+<body>
+<div id="container">
+	<canvas id="c" style="border:1px solid black"></canvas>
+</div>
+    
+<script>
+window.onload = function() {
+    const verlet = new Verlet();
+    verlet.init(500,500,'#c',1,1);
+    let ctx = verlet.ctx;
+
+    const points = [],
+        constrains = [],
+        forms = [];
+
+    verlet.Poly.bind(points,constrains)
+    verlet.Poly.hexagon({
+        x : 100 ,y : 100,
+        sides : 8,
+        radius : 50,
+        slice1 : 1,
+        slice2 : 2
+    })
+    verlet.Poly.box({
+        x : 100 ,y : 100,
+        width : 100,
+        height : 100
+    });
+
+    verlet.shape([8,9,10,11],forms,points,'red');
+
+    verlet.Studio.init('#container');
+    // ,{
+    //     renderDots : true,
+    //     renderLines : true,
+    //     renderHiddenLines : true,
+    //     renderPointIndex : true,
+    //     pointRadius : 3,
+    //     pointColor : 'red',
+    //     lineWidth : 1,
+    //     lineColor : 'blue',
+    //     hiddenLineColor : 'green',
+    //     hiddenLineWidth : 2,
+    // }
+    verlet.Interact.move(points);
+    animate();
+    function animate() {
+        verlet.clear();
+
+        // verlet.superRender(points,constrains,{
+        //     pointColor : 'royalblue',
+        //     lineWidth : 0.5,
+        //     lineColor : 'crimson',
+        //     hiddenLineColor : 'green',
+        //     hiddenLineWidth : 0.4
+        // });
+        // verlet.renderShapes(forms);
+        verlet.Studio.update({
+            points : points,
+            cons : constrains,
+            forms : forms,
+            option : {
+                hoverColor : 'red',
+                pointRadius : 5,
+                pointColor : 'royalblue',
+                lineWidth : 0.5,
+                lineColor : 'crimson',
+                hiddenLineColor : 'green',
+                hiddenLineWidth : 0.4
+            }   
+        });
+        // verlet.superUpdate(points,constrains,10,{hoverColor : 'red'});
+
+        requestAnimationFrame(animate)
+    }
+}
+</script>
+</body>
+</html>

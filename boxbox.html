@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="js/verlet.js" async></script>
+</head>
+<body>
+    <canvas id="c" style="border:1px solid black"></canvas>
+    <pre id="test"></pre>
+<script>
+window.onload = function() {
+    const verlet = new Verlet();
+    verlet.init(500,500,'#c',0,0);
+
+    let points = [],
+        constrains = [];
+    let boxDots = [],
+        boxCons =[];
+
+    function surface(x,y,sides) {
+        for(let i = 0; i < sides; i++) {
+            let splice = Math.PI*2 / sides;
+            x += Math.cos(Math.abs(splice*i)) * 50;
+            y += Math.sin(Math.sqrt(splice*i)) * 40;
+            boxDots.push([
+                x,y,x,y
+            ])
+        }
+    }
+    
+    surface(200,100,10);
+
+    verlet.create(boxDots,points);
+    verlet.clamp(boxCons,constrains,points);
+    console.log(verlet)
+   
+
+    animate();
+    verlet.Interact(points,constrains)
+    function animate() {
+        verlet.clear();
+        verlet.renderPointIndex(points)
+        verlet.superRender(points,constrains)
+        verlet.superUpdate(points,constrains,20)
+        
+        requestAnimationFrame(animate);
+    }
+}        
+</script>
+</body>
+</html>

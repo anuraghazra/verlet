@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+<script src="js/verlet.js"></script> 
+</head>
+<body>
+<div id="container">
+	<canvas id="c" style="border:1px solid black"></canvas>
+</div>
+    
+<script>
+window.onload = function() {
+    let verlet = new Verlet()
+    verlet.init(500,350,'#c',1,1);
+    let canvas = verlet.canvas;
+    let ctx = verlet.ctx;
+
+    let points = [],
+        constrains = [];
+
+    verlet.Poly.hexagon({
+        x : 200, y : 200,
+        radius : 60,
+        sides : 16,
+        slice1 : 1,
+        slice2 : 4,
+        center : true
+    },points,constrains);
+  
+    verlet.Interact.move(points)
+    function animate() {
+        verlet.clear();
+        
+        verlet.superRender(points,constrains,{
+                renderPointIndex : true,
+        		lineWidth : 0.5,
+        		lineColor : 'green',
+        })      
+                
+        verlet.superUpdate(points,constrains,10,{hoverColor:'red'})
+        requestAnimationFrame(animate)
+    }
+    animate();
+}
+</script>
+</body>
+</html>

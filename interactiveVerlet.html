@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+</head>
+<body>
+<canvas id="c" width="1000" height="500" style="border:1px solid black"></canvas>
+<script src="js/verlet.js"></script>
+<script src="../Vector/js/vector.js"></script>
+<script>
+window.onload = function() {
+	const verlet = new Verlet()
+	verlet.init(1000,500,'#c',0.8,1,1);
+
+	var	width = verlet.canvas.width,
+		height = verlet.canvas.height;
+	var points = [];
+	var constrains = [];
+	var gravity = 0.8;
+
+	//Box
+	var structure = [
+		[100,100,75,95],
+		[200,100,200,100],
+		[200,200,200,200],
+		[100,200,100,200]
+	];
+	var clmp = [
+	 	[0,1],
+		[1,2],
+		[2,3],
+		[3,0],
+		[0,2],
+		[1,3]
+	];
+	//Rope
+	var rope = [
+		[100,100,100,100],
+		[150,150,150,150],
+		[200,200,200,200,true],
+	];
+	var ropeClmp = [
+		[3,4],
+		[4,5],
+		[5,6],
+		[6,0]
+	]
+
+	verlet.create(structure,points)
+	verlet.create(rope,points)
+	verlet.clamp(clmp,constrains,points)
+	verlet.clamp(ropeClmp,constrains,points)
+
+	verlet.Interact.move(points,constrains)
+	var m = 0;
+	function animate() {
+		m += 0.01;
+		verlet.ctx.clearRect(0,0,width,height);
+
+		verlet.superUpdate(points,constrains,20)
+		verlet.superRender(points,constrains)
+
+		// var mo = verlet.Motion.circular(m,0.5,points[6]);
+		// points[6].x = mo.x;
+		// points[6].y = mo.y;
+		requestAnimationFrame(animate)
+	}
+	animate();
+}
+</script>		
+</body>
+</html>

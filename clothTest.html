@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<style>
+		* {
+			box-sizing: border-box;
+			font-family: 'Century Gothic';
+			color : gray;
+		}
+		body { 
+			background-color: rgb(25,25,25);
+		}
+		canvas {
+			float: left;
+			margin-right : 5px;
+		}
+		.container {
+			width: 100%;
+			padding: 5px;
+			margin: 0 auto;
+			border: 1px solid gray;
+			overflow: auto;
+		}
+		input {
+			width: 100%;
+			padding: 5px;
+		}
+		.check-container {
+			text-align: right;
+			padding: 5px;
+			display: inline-block;
+		}
+		.clothdiv {
+			margin : 3px;
+			border: 1px solid gray;
+			padding: 10px;
+			float: left;
+			width: 15%;
+		}
+	</style>
+</head>
+<body>
+<div class="container">
+	<canvas id="c" width="900" height="500" style="border:1px solid gray"></canvas>
+	<script src="js/verlet.js"></script>
+	<br>
+	<div class="clothdiv">
+		<p>Cloth Options</p>
+		<hr>
+		<p>Segments</p>
+		<input type="number" id="segs" value="50" min="1">
+		<p>X,Y</p>
+		<input style="width: 48%" type="number" value="100" id="clothx">
+		<input style="width: 49%" type="number" value="100" id="clothy">
+		<p>Gap , Color</p>
+		<input style="width: 48%" type="number" value="15" id="gap">
+		<input style="width: 49%" type="color" value="#64c8f5" id="c_color">
+	</div>
+
+	<div class="clothdiv" style="float: right">
+		<p>Physics Engine</p>
+		<hr>
+		<p>Physic Accuracy</p>
+		<input type="number" id="Iterrations" value="10" min="1">
+		<p>Render Options</p>
+		<div class="checks">
+			<div class="check-container"><input type="checkbox" id="dots">Dots</div>
+			<div class="check-container"><input type="checkbox" id="lines" checked="true">Lines</div>
+			<div class="check-container"><input type="checkbox" id="pointIndex">Index</div>
+		</div>
+	</div>
+
+	<div class="clothdiv" style="float: right">
+		<p>Pinning</p>
+		<hr>
+		<p>Pin Ratio</p>
+		<input type="number" id="pinratio" value="10" min="1">
+	</div>
+</div>
+<script>
+window.onload = function() {
+	let verlet = new Verlet();
+	verlet.init(900,500,'#c',0.8,0.99,0.9)
+	var PhysicsAccuracy = document.getElementById('Iterrations'),
+		dotOpt = document.getElementById('dots'),
+		LineOpt = document.getElementById('lines'),
+		IndexOpt = document.getElementById('pointIndex');
+
+	var c_segs = document.getElementById('segs'),
+		c_gridX = document.getElementById('gridX'),
+		c_gridY = document.getElementById('gridY'),
+		c_x = document.getElementById('clothx'),
+		c_y = document.getElementById('clothy'),
+		c_gap = document.getElementById('gap'),
+		c_pinratio = document.getElementById('pinratio');
+		c_color = document.getElementById('c_color');
+
+	//keyup
+	c_segs.addEventListener('keyup',updateCloth);
+	c_x.addEventListener('keyup',updateCloth);
+	c_y.addEventListener('keyup',updateCloth);
+	c_gap.addEventListener('keyup',updateCloth);
+	c_pinratio.addEventListener('keyup',updateCloth);
+	c_color.addEventListener('keyup',updateCloth);
+	//Change
+	c_segs.addEventListener('change',updateCloth);
+	c_x.addEventListener('change',updateCloth);
+	c_y.addEventListener('change',updateCloth);
+	c_gap.addEventListener('change',updateCloth);
+	c_pinratio.addEventListener('change',updateCloth);
+	c_color.addEventListener('change',updateCloth);
+
+
+	var points = [];
+	var constrains = [];
+
+	var c_points = [];
+	var c_constrains = [];
+	var gravity = 0.8;
+
+	var circle = {
+		x : 500,y : 200,
+		radius : 50
+	}
+	var inv_cir = {
+		x : 500,y : 200,
+		radius : 50
+	}
+	function createCircle(x,y,sides,radius) {
+		var angle = 0;
+		var slice = Math.PI*2 / sides;
+		c_points.push({
+			x : x + Math.cos(angle),
+			y : y + Math.sin(angle),
+			oldx : x + Math.cos(angle),
+			oldy : y + Math.sin(angle)
+		})
+		for(var i = 0; i < sides; i++) {
+			angle = i * slice;
+			c_points.push({
+				x : x + Math.cos(angle) * radius,
+				y : y + Math.sin(angle) * radius,
+				oldx : x + Math.cos(angle) * radius,
+				oldy : y + Math.sin(angle) * radius
+			})
+
+			c_constrains.push({
+				p0 : c_points[i],
+				p1 : c_points[(i + 1) % sides],
+				len : verlet.distance(c_points[i],c_points[(i + 1) % sides])
+			})
+			if(i > 0) {
+				c_constrains.push({
+					p0 : c_points[i+1],
+					p1 : c_points[0],
+					len : verlet.distance(c_points[i+1],c_points[0])
+					
+				})
+			}
+
+			if(i > sides-2) {
+				c_constrains.push({
+					p0 : c_points[sides],
+					p1 : c_points[sides-1],
+					len : verlet.distance(c_points[sides],c_points[sides-1])
+				})
+				c_constrains.push({
+					p0 : c_points[sides],
+					p1 : c_points[sides-sides+1],
+					len : verlet.distance(c_points[sides],c_points[sides-sides+1])
+				})
+				var k = 0;
+				for(var j = 0; j < sides; j++) {
+					k++; 
+					c_constrains.push({
+						p0 : c_points[(j+k) % sides],
+						p1 : c_points[(i + 1) % k],
+						len : verlet.distance(c_points[(j+k) % sides],c_points[(i + 1) % k]),
+						hidden : true
+					})
+				}
+			}
+		}
+	}
+	// createCircle(100,100,32,50);
+
+	function updateCloth() {
+		points = [];
+		constrains = [];
+		verlet.Poly.cloth({
+			x: parseInt(c_x.value),
+			y : parseInt(c_y.value),
+			gap : parseInt(c_gap.value),
+			segs : parseInt(c_segs.value),
+			pinRatio : 3,
+			tearable : true
+		},points,constrains)
+		console.log(constrains)
+		
+		// for (var i = 0; i < parseInt(c_gridX.value); i+=parseInt(pinratio.value) ? parseInt(pinratio.value) : 1) {
+		// 	points[i].pinned = true;
+		// }
+		verlet.Interact.move(points);
+		// verlet.Interact(c_points,c_constrains,(c_gap.value/2));
+	}
+	updateCloth();
+
+	var canvas = verlet.canvas;
+	var ctx = canvas.getContext('2d');
+
+	canvas.onmousemove = function(e) {
+		circle.x = e.offsetX;
+		circle.y = e.offsetY;
+	}
+	animate();
+
+	function animate() {
+		verlet.clear('rgb(19, 19, 19)');
+
+		verlet.Poly.tearCloth(constrains);
+
+		if(dotOpt.checked == true) {
+			verlet.renderDots(points,1,'blue');
+			verlet.renderDots(c_points,1,'blue');
+		}
+		if(LineOpt.checked == true) {
+			verlet.renderLines(constrains,0.4,c_color.value);
+			verlet.renderLines(c_constrains,0.4,'lightskyblue');
+		}
+		if(IndexOpt.checked == true) {
+			verlet.renderPointIndex(points,'10px Arial','red');
+			verlet.renderPointIndex(c_points,'10px Arial','red');
+		}
+
+		verlet.superUpdate(points,constrains,PhysicsAccuracy.value);
+		verlet.superUpdate(c_points,c_constrains,PhysicsAccuracy.value);
+
+		for (var i = 0; i < PhysicsAccuracy.value; i++) {
+			verlet.Collision.pointToCircle(points,circle)
+			verlet.Collision.pointToCircle(c_points,circle);
+		}
+		// inv_cir.x = c_points[0].x;
+		// inv_cir.y = c_points[0].y;
+		ctx.beginPath();	
+		ctx.arc(circle.x,circle.y,circle.radius,0,Math.PI*2);
+		ctx.stroke();
+
+		requestAnimationFrame(animate);
+	}
+}
+</script>	
+</body>
+</html>

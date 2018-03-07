@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<style>
+		* {
+			box-sizing: border-box;
+			font-family: 'Century Gothic';
+			color : gray;
+		}
+		body { 
+			background-color: rgb(25,25,25);
+		}
+		canvas {
+			float: left;
+			margin-right : 5px;
+		}
+		.container {
+			width: 100%;
+			padding: 5px;
+			margin: 0 auto;
+			border: 1px solid gray;
+			overflow: auto;
+		}
+		input {
+			width: 100%;
+			padding: 5px;
+		}
+		.check-container {
+			text-align: right;
+			padding: 5px;
+			display: inline-block;
+		}
+		.clothdiv {
+			margin : 3px;
+			border: 1px solid gray;
+			padding: 10px;
+			float: left;
+			width: 15%;
+		}
+	</style>
+</head>
+<body>
+<script src="js/verlet.js"></script>
+	<canvas id="c"></canvas>
+	<br>Brush Mode
+	<input type="checkbox" id="brush">
+	<input type="number" step="0.1" value="0.0" id="gravity">
+</body>
+<script>
+window.onload = function() {
+	const verlet = new Verlet();
+	verlet.init(900,500,'#c',0.0,0.99,0.9);
+	var ctx = verlet.canvas.getContext('2d');
+
+	var points = [];
+	var constrains = [];
+	var mx,my;
+
+	var trig = [],
+		trigClamp = [],
+		tmpCir = [],
+		handle = [];
+
+	var ptime = 1;
+	var brushMode = document.getElementById('brush');
+	
+	// var rope = verlet.Poly.rope(100,100,20,30);
+	// verlet.create(rope.points,points);
+	// verlet.clamp(rope.joints,constrains,points)
+	verlet.Poly.box({
+		x : 50,
+		y : 50,
+		width : 50,
+		height : 50,
+		vx : 50, vy : 50
+	},points,constrains)
+
+
+	brushType = 'mousedown'
+	document.body.addEventListener('keydown',function(e) {
+		if(brushMode.checked == true) {
+			brushType = 'mousemove';
+		} else {
+			brushType = 'mousedown';
+		}
+		if(e.which === 16) {
+			if(ptime > 0) {
+				verlet.canvas.addEventListener('mousedown',getPoint)
+				trigClamp.push(handle);
+			};
+			--ptime;
+		}
+		if(e.which === 67) {
+			verlet.canvas.addEventListener(brushType,createPoint)
+		}
+	})
+	document.body.addEventListener('keyup',function(e) {
+		ptime = 1;
+		if(brushMode.checked == true) {
+			brushType = 'mousemove';
+		} else {
+			brushType = 'mousedown';
+		}
+		if(e.which === 16) {
+			verlet.canvas.removeEventListener('mousedown',getPoint)
+		}
+		if(e.which === 67) {
+			verlet.canvas.removeEventListener(brushType,createPoint)
+		}
+	})
+	//Create Points
+	function createPoint(e) {
+		if(e.which === 1) {
+			mx = e.offsetX;
+			my = e.offsetY;
+			trig.push([mx,my,mx,my]);
+			tmpCir.push({x : mx,y : my});
+		}
+		if(e.which === 3) {
+			tmpCir = [];
+			verlet.create(trig,points);
+			trig = [];
+			verlet.clamp(trigClamp,constrains,points);
+			trigClamp = [];
+		}
+	}
+
+	//Get A Offset For Creating Constrains
+	function getPoint(me) {
+		for(var i = 0; i < points.length; i++) {
+			if(colDetect(me.offsetX,me.offsetY,points[i]) < 15) {
+				handle.push(i);
+			}
+		}
+		if(handle.length > 2) {
+			handle.splice(0,1);
+		}
+	}
+	function colDetect(x,y,circle) {
+		var dx = x - circle.x;
+		var dy = y - circle.y;
+		return Math.sqrt(dx*dx + dy*dy);
+	}
+
+	verlet.canvas.oncontextmenu = function (e) {
+        e.preventDefault();
+    };
+
+	verlet.Interact(points,constrains);
+	function animate() {
+		verlet.clear();
+		var grav = document.getElementById('gravity');
+		verlet.gravity = parseFloat(grav.value);
+		
+		verlet.renderDots(points,5,'blue');
+		verlet.renderLines(constrains,0.4);
+		verlet.renderPointIndex(points,'10px Arial','gray');
+		verlet.superUpdate(points,constrains,20);
+
+		for (var i = 0; i < tmpCir.length; i++) {
+			ctx.beginPath();
+			ctx.fillStyle = 'gray';
+			ctx.arc(tmpCir[i].x,tmpCir[i].y,5,0,Math.PI*2);
+			ctx.fill();
+		}
+		requestAnimationFrame(animate)
+	}
+	animate();
+}
+</script>
+</body>
+</html>

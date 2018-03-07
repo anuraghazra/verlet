@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<script src="js/verlet.js"></script>
+</head>
+<body>
+	<canvas id="c" style="border:1px solid black"></canvas>
+<script>
+window.onload = function() {
+	const verlet = new Verlet();
+	verlet.init(300,300,'#c',1,1);
+	const ctx  = verlet.ctx;
+	let points = [],
+		constrains = [];
+
+	let gridX = 5;
+	let gridY = 5;
+	let W = verlet.canvas.width;
+	let H = verlet.canvas.height;
+
+	function trace() {
+		ctx.fillStyle = 'black';
+		ctx.font = 'bold 100px Arial';
+		ctx.fillText('GSS',120,170);
+
+		var idata = ctx.getImageData(0, 0, W, H);
+		var buffer32 = new Uint32Array(idata.data.buffer);
+		for (var y = 0; y < H; y += gridY) {
+				for (var x = 0; x < W; x += gridX) {
+				if (buffer32[y * W + x]) {
+					points.push({
+						x : x,y : y,
+						oldx : x,oldy:y
+					});
+				}
+			}
+		}
+		ctx.clearRect(0, 0, W, H);
+	}
+
+
+	verlet.Interact.move(points);
+	animate();
+	trace();
+	console.log(points)
+	function animate() {
+		verlet.clear();
+		
+		verlet.superRender(points,constrains)
+		verlet.superUpdate(points,constrains,20);
+
+		requestAnimationFrame(animate);
+	}
+}
+</script>
+</body>
+</html>

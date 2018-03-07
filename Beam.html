@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Canvas Boilerplate</title>
+    <script src="js/verlet.js"></script>
+</head>
+<body>
+<div id="container">
+    <canvas id="c" style="border: 1px solid black"></canvas>
+</div>
+<script>
+window.onload = function() {
+    const verlet = new Verlet();
+    verlet.init(640,400,'#c',0,0);
+    let width = verlet.canvas.width,
+        height = verlet.canvas.height;
+
+    let points = [],
+        constrains = [];
+
+    
+    // verlet.Poly.bind(points,constrains)
+    // verlet.Poly.box({
+    //     x : 100,y : 100,
+    //     width : 100,height : 100
+    // })
+    // function Beam(opt,dots,cons) {
+    //     let beamDots = [];
+    //     let beamCons = [];
+    //     let oldx = opt.x;
+    //     let cols = 2;
+    //     let rows = opt.segs;
+    //     let x = opt.x;
+    //     let y = opt.y;
+    //     let width = opt.width;
+    //     let height = opt.height;
+    //     for (let i = 0; i < cols; i++) {
+    //         for (let j = 0; j < rows; j++) {
+    //             beamDots.push([
+    //                 x,y,x,y
+    //             ])
+    //             x += width;
+    //         }
+    //         x = oldx;
+    //         y += height;
+    //     }
+    //     for (let j = 0; j < cols*rows-1; j++) {
+    //         if( (j+1)%rows > 0 ) {
+    //             beamCons.push([
+    //                 (j),(j+1)%rows
+    //             ])
+    //         }
+    //     }
+    //     for (let j = 0; j < rows; j++) {
+    //         beamCons.push([
+    //             (j),(j+rows)
+    //         ]);
+    //     }
+    //     for (let k = 0; k < rows-1; k++) {
+    //         beamCons.push([(rows+k),(rows+k+1)]);
+    //     }
+
+    //     verlet.create(beamDots,dots);
+    //     verlet.clamp(beamCons,cons,dots)
+    // }
+    verlet.Poly.box({
+        x : 100,y : 100,
+        segs : 5,
+        width : 100,
+        height : 100
+    },points,constrains);
+    verlet.Poly.beam({
+        x : 100,y : 100,
+        segs : 5,
+        width : 100,
+        height : 100
+    },points,constrains);
+
+
+    verlet.Studio.init('#container');
+    verlet.Interact.move(points);
+    animate();
+    function animate() {
+        verlet.clear();
+
+        verlet.Studio.update({
+            points : points,
+            cons : constrains,
+            option : {
+                gravity : 0.000000001,
+                renderPointIndex : true,
+                lineWidth : 0.5
+            }
+        })
+
+        requestAnimationFrame(animate);
+    }
+}
+</script>
+</body>
+</html>

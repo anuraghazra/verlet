@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Canvas Boilerplate</title>
+    <script src="js/verlet.js"></script>
+</head>
+<body>
+    <canvas id="c" style="border: 1px solid black"></canvas>
+<script>
+window.onload = function() {
+    const verlet = new Verlet();
+    verlet.init(500,350,'#c',1,1);
+
+    let points = [];
+    let constrains = [];
+
+    verlet.Poly.box({
+        width : Math.random()*50+50,
+        height : Math.random()*50+50,
+        vx : Math.random()*100,
+        vy : Math.random()*100,
+        x : 100, y : 100
+    },points,constrains);
+    verlet.Poly.hexagon({
+        x : 100, y : 100,
+        radius : Math.random()*10+50,
+        sides : Math.floor(Math.random()*16+8),
+        slice1 : Math.floor(Math.random()*16),
+        slice2 : Math.floor(Math.random()*16),
+        center : true,
+        clone : 2
+    },points,constrains);
+    // verlet.Poly.beam({
+    //     width : Math.random()*50+50,
+    //     height : Math.random()*50+50,
+    //     segs : 4,
+    //     x : 100, y : 100,
+    //     // clone : 2
+    // },points,constrains);
+    // verlet.Poly.rope({
+    //     x : 100, y : 100,
+    //     parts : 20,
+    //     gap : 10,
+    // },points,constrains)
+    // verlet.Poly.cloth({
+    //     x : 100, y : 100,
+    //     segs : 20,
+    //     gap : 10,
+    // },points,constrains)
+
+
+    animate();
+    verlet.Interact.move(points,constrains);
+    function animate() {
+        verlet.clear();
+
+        verlet.superRender(points,constrains,{
+            preset : 'shadowPink',
+            debug : true
+        });
+        verlet.superUpdate(points,constrains,10);
+
+        requestAnimationFrame(animate);
+    }
+}
+</script>
+</body>
+</html>
